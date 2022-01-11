@@ -1,2 +1,5 @@
-def build_tuple(*args):
-    return args
+from typing import Any
+
+
+def struct(*fields) -> Any:
+    ...  # TODO:

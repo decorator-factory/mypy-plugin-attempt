@@ -1,6 +1,11 @@
-from attempt.things import build_tuple
+from attempt.things import struct
 
+UserInfo = struct(
+    ("name", "string"),
+    ("city", "string?"),
+)
 
-# Revealed type is "Tuple[builtins.str, builtins.int, builtins.str]"
-bob = build_tuple("Bob", 42, "St. Petersburg")
-reveal_type(bob)
+def f(u: UserInfo):
+    reveal_type(u.name)
+    reveal_type(u.city)
+
