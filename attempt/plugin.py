@@ -38,6 +38,9 @@ class CustomPlugin(Plugin):
             value = value_expr.value
 
             str_type = ctx.api.named_type("builtins.str")
+
+            value_type: MypyType
+
             if value == "string":
                 value_type = str_type
             elif value == "string?":
