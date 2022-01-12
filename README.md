@@ -1,2 +1,3 @@
 # mypy-plugin-attempt
-at least I tried
+
+My attempt at making a mypy plugin.
