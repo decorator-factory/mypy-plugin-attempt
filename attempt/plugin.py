@@ -1,8 +1,23 @@
 from typing import Optional, Callable
 
+from mypy.plugins.common import add_method_to_class
 from mypy.plugin import Plugin, DynamicClassDefContext
 from mypy.types import Type as MypyType, Instance, NoneType, UnionType
-from mypy.nodes import TypeInfo, ClassDef, SymbolTable, SymbolTableNode, MDEF, GDEF, Block, StrExpr, TupleExpr, Var
+from mypy.nodes import (
+    TypeInfo,
+    ClassDef,
+    SymbolTable,
+    SymbolTableNode,
+    MDEF,
+    GDEF,
+    Block,
+    StrExpr,
+    TupleExpr,
+    Var,
+    FuncDef,
+    Argument,
+    ArgKind,
+)
 
 
 class CustomPlugin(Plugin):
@@ -75,6 +90,14 @@ class CustomPlugin(Plugin):
         object_type: Instance = ctx.api.named_type("builtins.object")
         info.bases = [object_type]
         info.mro = [info, object_type.type]
+
+        class_def.info = info
+
+        init_args = [
+            Argument(Var(name, typ), typ, None, ArgKind.ARG_NAMED)
+            for name, typ in field_types.items()
+        ]
+        add_method_to_class(ctx.api, class_def, "__init__", init_args, return_type=NoneType())
 
         for var in vars.values():
             var.info = info
