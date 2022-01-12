@@ -37,6 +37,7 @@ class CustomPlugin(Plugin):
             key = key_expr.value
             value = value_expr.value
 
+            int_type = ctx.api.named_type("builtins.int")
             str_type = ctx.api.named_type("builtins.str")
 
             value_type: MypyType
@@ -45,8 +46,12 @@ class CustomPlugin(Plugin):
                 value_type = str_type
             elif value == "string?":
                 value_type = UnionType([str_type, NoneType()])
+            elif value == "integer":
+                value_type = int_type
+            elif value == "integer?":
+                value_type = UnionType([int_type, NoneType()])
             else:
-                ctx.api.fail("Expected either 'string' or 'string?'", value_expr)
+                ctx.api.fail("Expected string, string?, integer, integer?, got {0}".format(value), value_expr)
                 return
 
             field_types[key] = value_type
