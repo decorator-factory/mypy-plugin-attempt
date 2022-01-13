@@ -1,4 +1,4 @@
-from attempt.things import struct
+from attempt.things import struct, sequence_m
 
 UserInfo = struct(
     ("name", "string"),
@@ -37,3 +37,24 @@ def f(u: UserInfo):
     reveal_type(u.name)
     reveal_type(u.city)
 
+
+###
+
+
+from typing import Awaitable
+
+
+@sequence_m
+def my_gather(*args) -> Awaitable:
+    ...
+
+
+async def foo() -> int:
+    return 42
+
+async def bar() -> str:
+    return "hey"
+
+async def main() -> None:
+    x = await my_gather(foo(), bar(), bar())
+    reveal_type(x)  # tuple[int, str, str]

@@ -1,4 +1,7 @@
-from typing import Any
+from typing import Any, Callable, Generic, TypeVar
+
+
+T = TypeVar("T")
 
 
 def struct(*fields) -> Any:
@@ -15,3 +18,15 @@ def struct(*fields) -> Any:
             self.__dict__.update(kwargs)
 
     return Struct
+
+
+class SequenceM(Generic[T]):
+    def __init__(self):
+        raise NotImplementedError
+
+    def __call__(self, *args):
+        raise NotImplementedError
+
+
+def sequence_m(function: Callable[..., T]) -> SequenceM[T]:
+    return function  # type: ignore

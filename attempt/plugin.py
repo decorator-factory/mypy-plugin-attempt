@@ -1,8 +1,21 @@
 from typing import Optional, Callable
 
 from mypy.plugins.common import add_method_to_class
-from mypy.plugin import Plugin, DynamicClassDefContext
-from mypy.types import Type as MypyType, Instance, NoneType, UnionType
+from mypy.plugin import Plugin, DynamicClassDefContext, MethodContext
+from mypy.join import join_types
+from mypy.maptype import map_instance_to_supertype
+from mypy.types import (
+    TypeVarType,
+    TypeOfAny,
+    AnyType,
+    Type as MypyType,
+    Instance,
+    NoneType,
+    UnionType,
+    TupleType,
+    TypeVarId,
+)
+
 from mypy.nodes import (
     TypeInfo,
     ClassDef,
@@ -14,13 +27,56 @@ from mypy.nodes import (
     StrExpr,
     TupleExpr,
     Var,
-    FuncDef,
     Argument,
     ArgKind,
 )
 
 
+def unify_types(type_: MypyType, type_constructor: TypeInfo) -> MypyType:
+    typevar_id = TypeVarId.new(meta_level=1)
+    type2 = Instance(type_constructor, [
+        TypeVarType("X", "X", typevar_id, values=[], upper_bound=AnyType(TypeOfAny.explicit))
+    ])
+    return join_types(type_, type2)
+
+
 class CustomPlugin(Plugin):
+    def get_method_hook(self, fullname: str) -> Optional[Callable[[MethodContext], MypyType]]:
+        if not fullname.startswith("attempt."):
+            return None
+
+        if fullname == "attempt.things.SequenceM.__call__":
+            return self._sequence_m_type
+
+        return None
+
+    def _sequence_m_type(self, ctx: MethodContext) -> MypyType:
+        if not isinstance(ctx.type, Instance):
+            ctx.api.fail(f"Expected named type as instance type, got {0}".format(ctx.type), ctx)
+            return ctx.default_return_type
+
+        tuple_type = ctx.api.named_generic_type("builtins.tuple", [])
+
+        sequence_m_parameter = ctx.type.args[0]
+        if not isinstance(sequence_m_parameter, Instance):
+            ctx.api.fail(f"Expected type constructor as parameter to SequenceM", ctx)
+            return ctx.default_return_type
+        type_constructor = sequence_m_parameter.type
+
+        inner_types: list[MypyType] = []
+        for t in ctx.arg_types[0]:
+            if not isinstance(t, Instance):
+                ctx.api.fail("Only support simple types for now, sorry!", t)
+                inner_types.append(AnyType(TypeOfAny.explicit))
+                continue
+            unified = map_instance_to_supertype(t, type_constructor)
+            inner_types.append(unified.args[0])
+
+        return Instance(
+            type_constructor,
+            [TupleType(inner_types, tuple_type)]
+        )
+
     def get_dynamic_class_hook(self, fullname: str) -> Optional[Callable[[DynamicClassDefContext], None]]:
         if fullname == "attempt.things.struct":
             return self._build_struct_type
