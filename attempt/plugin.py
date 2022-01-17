@@ -2,10 +2,8 @@ from typing import Optional, Callable
 
 from mypy.plugins.common import add_method_to_class
 from mypy.plugin import Plugin, DynamicClassDefContext, MethodContext
-from mypy.join import join_types
 from mypy.maptype import map_instance_to_supertype
 from mypy.types import (
-    TypeVarType,
     TypeOfAny,
     AnyType,
     Type as MypyType,
@@ -13,7 +11,6 @@ from mypy.types import (
     NoneType,
     UnionType,
     TupleType,
-    TypeVarId,
 )
 
 from mypy.nodes import (
@@ -30,14 +27,6 @@ from mypy.nodes import (
     Argument,
     ArgKind,
 )
-
-
-def unify_types(type_: MypyType, type_constructor: TypeInfo) -> MypyType:
-    typevar_id = TypeVarId.new(meta_level=1)
-    type2 = Instance(type_constructor, [
-        TypeVarType("X", "X", typevar_id, values=[], upper_bound=AnyType(TypeOfAny.explicit))
-    ])
-    return join_types(type_, type2)
 
 
 class CustomPlugin(Plugin):
