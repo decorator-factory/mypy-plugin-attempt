@@ -46,7 +46,7 @@ from typing import Awaitable
 
 @gathers
 def my_gather(*args) -> Awaitable:
-    ...
+    assert False
 
 
 async def foo() -> int:
