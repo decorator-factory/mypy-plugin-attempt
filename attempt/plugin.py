@@ -34,23 +34,23 @@ class CustomPlugin(Plugin):
         if not fullname.startswith("attempt."):
             return None
 
-        if fullname == "attempt.things.SequenceM.__call__":
-            return self._sequence_m_type
+        if fullname == "attempt.things.Gathers.__call__":
+            return self._gathers_type
 
         return None
 
-    def _sequence_m_type(self, ctx: MethodContext) -> MypyType:
+    def _gathers_type(self, ctx: MethodContext) -> MypyType:
         if not isinstance(ctx.type, Instance):
             ctx.api.fail(f"Expected named type as instance type, got {0}".format(ctx.type), ctx)
             return ctx.default_return_type
 
         tuple_type = ctx.api.named_generic_type("builtins.tuple", [])
 
-        sequence_m_parameter = ctx.type.args[0]
-        if not isinstance(sequence_m_parameter, Instance):
-            ctx.api.fail(f"Expected type constructor as parameter to SequenceM", ctx)
+        gathers_param = ctx.type.args[0]
+        if not isinstance(gathers_param, Instance):
+            ctx.api.fail(f"Expected type constructor as parameter to Gathers", ctx)
             return ctx.default_return_type
-        type_constructor = sequence_m_parameter.type
+        type_constructor = gathers_param.type
 
         inner_types: list[MypyType] = []
         for t in ctx.arg_types[0]:
@@ -152,4 +152,3 @@ class CustomPlugin(Plugin):
 
 def plugin(version: str):
     return CustomPlugin
-

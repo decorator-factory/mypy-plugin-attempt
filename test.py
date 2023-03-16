@@ -1,4 +1,4 @@
-from attempt.things import struct, sequence_m
+from attempt.things import struct, gathers
 
 UserInfo = struct(
     ("name", "string"),
@@ -44,7 +44,7 @@ def f(u: UserInfo):
 from typing import Awaitable
 
 
-@sequence_m
+@gathers
 def my_gather(*args) -> Awaitable:
     ...
 

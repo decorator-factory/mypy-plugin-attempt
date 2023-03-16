@@ -20,7 +20,7 @@ def struct(*fields) -> Any:
     return Struct
 
 
-class SequenceM(Generic[T]):
+class Gathers(Generic[T]):
     def __init__(self):
         raise NotImplementedError
 
@@ -28,5 +28,5 @@ class SequenceM(Generic[T]):
         raise NotImplementedError
 
 
-def sequence_m(function: Callable[..., T]) -> SequenceM[T]:
+def gathers(function: Callable[..., T]) -> Gathers[T]:
     return function  # type: ignore
